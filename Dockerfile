@@ -21,14 +21,16 @@ RUN apt-get -qy install mysql-client mysql-server
 # Cleanup some things
 RUN apt-get -q autoclean && \
   rm -rf /var/lib/apt/lists/*
+
 # Make mysql listen on the outside
+RUN sed -i "s/^myisam-recover/myisam-recover-options/" /etc/mysql/my.cnf
 RUN sed -i "s/^bind-address/#bind-address/" /etc/mysql/my.cnf
 
 # Volume for MySQL data
 VOLUME /var/lib/mysql
 
 # MySQL start command.
-COPY docker-entrypoint.sh /usr/local/bin/
+COPY scripts/docker-entrypoint.sh /usr/local/bin/
 RUN chmod a+x /usr/local/bin/docker-entrypoint.sh
 RUN ln -s usr/local/bin/docker-entrypoint.sh /entrypoint.sh # backwards compat
 ENTRYPOINT ["docker-entrypoint.sh"]
