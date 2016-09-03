@@ -4,7 +4,7 @@ This image works with **Debian 8** and use current last **MySQL 5.7/5.6/5.5** ve
 
 ## Example usage: ##
 
-`$ docker run -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=change_me keopx/docker-mysql`
+`$ docker run -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=change_me keopx/mysql`
 
 ## Environment variables ##
 
