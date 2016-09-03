@@ -1,6 +1,6 @@
 # Introduction #
 
-This image works with **Debian 8** and use current last **MySQL 5.5** version.
+This image works with **Debian 8** and use current last **MySQL 5.7/5.6/5.5** version.
 
 ## Example usage: ##
 
