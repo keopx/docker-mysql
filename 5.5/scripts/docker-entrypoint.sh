@@ -16,7 +16,6 @@ fi
 
 cat << EOF > $tfile
 USE mysql;
-FLUSH PRIVILEGES;
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
 UPDATE user SET password=PASSWORD("$MYSQL_ROOT_PASSWORD") WHERE user='root';
 EOF
@@ -28,6 +27,8 @@ if [[ $MYSQL_DATABASE != "" ]]; then
         echo "GRANT ALL ON \`$MYSQL_DATABASE\`.* to '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';" >> $tfile
     fi
 fi
+
+echo "\nFLUSH PRIVILEGES;" >> $tfile
 
 /usr/sbin/mysqld --bootstrap --verbose=0 < $tfile
 rm -f $tfile
