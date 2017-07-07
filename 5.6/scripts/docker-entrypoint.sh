@@ -29,6 +29,8 @@ if [[ $MYSQL_DATABASE != "" ]]; then
     fi
 fi
 
+echo "FLUSH PRIVILEGES;" >> $tfile
+
 /usr/sbin/mysqld --bootstrap --verbose=0 < $tfile
 rm -f $tfile
 
