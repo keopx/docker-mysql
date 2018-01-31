@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM debian:stretch
 
 MAINTAINER keopx <keopx@keopx.net>
 
@@ -6,21 +6,24 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # Set repositories
 RUN \
-  echo "deb http://ftp.de.debian.org/debian/ jessie main non-free contrib\n" > /etc/apt/sources.list && \
-  echo "deb-src http://ftp.de.debian.org/debian/ jessie main non-free contrib\n" >> /etc/apt/sources.list && \
-  echo "deb http://security.debian.org/ jessie/updates main contrib non-free\n" >> /etc/apt/sources.list && \
-  echo "deb-src http://security.debian.org/ jessie/updates main contrib non-free" >> /etc/apt/sources.list
+  echo "deb http://ftp.de.debian.org/debian/ stretch main non-free contrib\n" > /etc/apt/sources.list && \
+  echo "deb-src http://ftp.de.debian.org/debian/ stretch main non-free contrib\n" >> /etc/apt/sources.list && \
+  echo "deb http://security.debian.org/ stretch/updates main contrib non-free\n" >> /etc/apt/sources.list && \
+  echo "deb-src http://security.debian.org/ stretch/updates main contrib non-free" >> /etc/apt/sources.list
 
 
 # Update repositories cache and distribution
 RUN apt-get -qq update && apt-get -qqy upgrade
+
+RUN \
+  apt-get -yqq install apt-transport-https lsb-release ca-certificates gnupg2
 
 # gpg: key 5072E1F5: public key "MySQL Release Engineering <mysql-build@oss.oracle.com>" imported
 RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys A4A9406876FCBD3C456770C88C718D3B5072E1F5
 
 ENV MYSQL_VERSION 5.6
 
-RUN echo "deb http://repo.mysql.com/apt/debian/ jessie mysql-${MYSQL_VERSION}" > /etc/apt/sources.list.d/mysql.list
+RUN echo "deb http://repo.mysql.com/apt/debian/ stretch mysql-${MYSQL_VERSION}" > /etc/apt/sources.list.d/mysql.list
 
 # Install MySQL server.
 # The "/var/lib/mysql" stuff here is because the mysql-server postinst doesn't have an explicit way to disable the mysql_install_db codepath besides having a database already "configured" (ie, stuff in /var/lib/mysql/mysql) also, we set debconf keys to make APT a little quieter
