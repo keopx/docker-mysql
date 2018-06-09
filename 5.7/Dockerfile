@@ -6,36 +6,46 @@ ENV DEBIAN_FRONTEND noninteractive
 
 ENV MYSQL_MAJOR 5.7
 
-# add gosu for easy step-down from root
-ENV GOSU_VERSION 1.7
-
 # Set repositories
 RUN \
-  echo "deb http://ftp.de.debian.org/debian/ stretch main non-free contrib\n" > /etc/apt/sources.list && \
-  echo "deb-src http://ftp.de.debian.org/debian/ stretch main non-free contrib\n" >> /etc/apt/sources.list && \
-  echo "deb http://security.debian.org/ stretch/updates main contrib non-free\n" >> /etc/apt/sources.list && \
-  echo "deb-src http://security.debian.org/ stretch/updates main contrib non-free" >> /etc/apt/sources.list
-
-# Update repositories cache and distribution
-RUN apt-get -qq update && apt-get -qqy upgrade
+  echo "deb http://ftp.de.debian.org/debian/ stretch main non-free contrib" > /etc/apt/sources.list && \
+  echo "deb-src http://ftp.de.debian.org/debian/ stretch main non-free contrib" >> /etc/apt/sources.list && \
+  echo "deb http://security.debian.org/ stretch/updates main contrib non-free" >> /etc/apt/sources.list && \
+  echo "deb-src http://security.debian.org/ stretch/updates main contrib non-free" >> /etc/apt/sources.list && \
+  # Update repositories cache and distribution
+  apt-get -qq update && apt-get -qqy upgrade
 
 RUN \
-  apt-get -yqq install apt-transport-https lsb-release ca-certificates gnupg2
+  apt-get -yqq install apt-transport-https lsb-release ca-certificates gnupg2 wget dirmngr && rm -rf /var/lib/apt/lists/*
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN groupadd -r mysql && useradd -r -g mysql mysql
 
-RUN set -x \
-	&& apt-get update && apt-get install -y --no-install-recommends ca-certificates wget && rm -rf /var/lib/apt/lists/* \
-	&& wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)" \
-	&& wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc" \
-	&& export GNUPGHOME="$(mktemp -d)" \
-	&& gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
-	&& gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
-	&& rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc \
-	&& chmod +x /usr/local/bin/gosu \
-	&& gosu nobody true
-# 	\
+# grab gosu for easy step-down from root
+# https://github.com/tianon/gosu/releases
+ENV GOSU_VERSION 1.10
+
+RUN set -ex; \
+	fetchDeps='ca-certificates wget bzip2 gnupg dirmngr'; \
+	apt-get -qq update && apt-get install -y --no-install-recommends $fetchDeps; \
+	update-ca-certificates; \
+	dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
+	wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch"; \
+	wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch.asc"; \
+	export GNUPGHOME="$(mktemp -d)" && \
+	for server in $(shuf -e ha.pool.sks-keyservers.net \
+   hkp://p80.pool.sks-keyservers.net:80 \
+   keyserver.ubuntu.com \
+   hkp://keyserver.ubuntu.com:80 \
+   pgp.mit.edu) ; do \
+   gpg --keyserver "$server" --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 && break || : ; \
+	done && \
+	gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
+	rm -fr "$GNUPGHOME" /usr/local/bin/gosu.asc; \
+	chmod +x /usr/local/bin/gosu; \
+	gosu nobody true
+# 	&& gosu nobody true \
+# 	&& gosu nobody true \
 # 	&& apt-get purge -y --auto-remove ca-certificates wget
 
 RUN mkdir /docker-entrypoint-initdb.d
@@ -74,6 +84,7 @@ RUN { \
 # don't reverse lookup hostnames, they are usually another container
 	&& echo '[mysqld]\nskip-host-cache\nskip-name-resolve' > /etc/mysql/conf.d/docker.cnf
 
+# Volume for MySQL data
 VOLUME /var/lib/mysql
 
 # MySQL start command.
