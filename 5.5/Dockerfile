@@ -6,14 +6,12 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # Set repositories
 RUN \
-  echo "deb http://ftp.de.debian.org/debian/ jessie main non-free contrib\n" > /etc/apt/sources.list && \
-  echo "deb-src http://ftp.de.debian.org/debian/ jessie main non-free contrib\n" >> /etc/apt/sources.list && \
-  echo "deb http://security.debian.org/ jessie/updates main contrib non-free\n" >> /etc/apt/sources.list && \
-  echo "deb-src http://security.debian.org/ jessie/updates main contrib non-free" >> /etc/apt/sources.list
-
-
-# Update repositories cache and distribution
-RUN apt-get -qq update && apt-get -qqy upgrade
+  echo "deb http://ftp.de.debian.org/debian/ jessie main non-free contrib" > /etc/apt/sources.list && \
+  echo "deb-src http://ftp.de.debian.org/debian/ jessie main non-free contrib" >> /etc/apt/sources.list && \
+  echo "deb http://security.debian.org/ jessie/updates main contrib non-free" >> /etc/apt/sources.list && \
+  echo "deb-src http://security.debian.org/ jessie/updates main contrib non-free" >> /etc/apt/sources.list && \
+  # Update repositories cache and distribution
+  apt-get -qq update && apt-get -qqy upgrade
 
 # Install MySQL server.
 RUN apt-get -qy install mysql-client mysql-server 

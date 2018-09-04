@@ -59,7 +59,10 @@ RUN \
    apt-get update && apt-get install -y perl pwgen openssl --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 # gpg: key 5072E1F5: public key "MySQL Release Engineering <mysql-build@oss.oracle.com>" imported
-RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys A4A9406876FCBD3C456770C88C718D3B5072E1F5
+RUN \
+   apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys A4A9406876FCBD3C456770C88C718D3B5072E1F5 || \
+   apt-key adv --recv-key --keyserver pgp.mit.edu A4A9406876FCBD3C456770C88C718D3B5072E1F5 || \
+   apt-key adv --recv-key --keyserver keyserver.pgp.com A4A9406876FCBD3C456770C88C718D3B5072E1F5
 
 RUN echo "deb http://repo.mysql.com/apt/debian/ stretch mysql-${MYSQL_MAJOR}" > /etc/apt/sources.list.d/mysql.list
 

@@ -6,20 +6,21 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # Set repositories
 RUN \
-  echo "deb http://ftp.de.debian.org/debian/ stretch main non-free contrib\n" > /etc/apt/sources.list && \
-  echo "deb-src http://ftp.de.debian.org/debian/ stretch main non-free contrib\n" >> /etc/apt/sources.list && \
-  echo "deb http://security.debian.org/ stretch/updates main contrib non-free\n" >> /etc/apt/sources.list && \
-  echo "deb-src http://security.debian.org/ stretch/updates main contrib non-free" >> /etc/apt/sources.list
-
-
-# Update repositories cache and distribution
-RUN apt-get -qq update && apt-get -qqy upgrade
+  echo "deb http://ftp.de.debian.org/debian/ stretch main non-free contrib" > /etc/apt/sources.list && \
+  echo "deb-src http://ftp.de.debian.org/debian/ stretch main non-free contrib" >> /etc/apt/sources.list && \
+  echo "deb http://security.debian.org/ stretch/updates main contrib non-free" >> /etc/apt/sources.list && \
+  echo "deb-src http://security.debian.org/ stretch/updates main contrib non-free" >> /etc/apt/sources.list && \
+  # Update repositories cache and distribution
+  apt-get -qq update && apt-get -qqy upgrade
 
 RUN \
   apt-get -yqq install apt-transport-https lsb-release ca-certificates gnupg2
 
 # gpg: key 5072E1F5: public key "MySQL Release Engineering <mysql-build@oss.oracle.com>" imported
-RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys A4A9406876FCBD3C456770C88C718D3B5072E1F5
+RUN \
+   apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys A4A9406876FCBD3C456770C88C718D3B5072E1F5 || \
+   apt-key adv --recv-key --keyserver pgp.mit.edu A4A9406876FCBD3C456770C88C718D3B5072E1F5 || \
+   apt-key adv --recv-key --keyserver keyserver.pgp.com A4A9406876FCBD3C456770C88C718D3B5072E1F5
 
 ENV MYSQL_VERSION 5.6
 
